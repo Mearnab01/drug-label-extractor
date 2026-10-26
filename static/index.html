@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Drug Label Extractor</title>
+  <meta name="description" content="Extract structured prescription data from label photos with OCR and an LLM, with every value checked against the source text.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23f0a63a%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8h8M7 12h10M7 16h6%27/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <svg class="ic ic-lg accent" aria-hidden="true"><use href="/static/icons.svg#scan-text"/></svg>
+      <div>
+        <h1>Drug Label Extractor</h1>
+        <p>Prescription label photo in, verified structured data out.</p>
+      </div>
+    </div>
+    <div class="top-right">
+      <span id="engine" class="pill" title="Extraction engine"></span>
+      <a class="btn ghost" href="https://github.com/" target="_blank" rel="noopener" id="repo-link">
+        <svg class="ic" aria-hidden="true"><use href="/static/icons.svg#github"/></svg><span>Source</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="left" aria-label="Label image">
+      <div id="drop" class="drop" tabindex="0" role="button" aria-label="Upload a label image">
+        <svg class="ic ic-lg" aria-hidden="true"><use href="/static/icons.svg#upload"/></svg>
+        <div>
+          <strong>Drop a label photo here</strong>
+          <span>or click to browse, or paste from the clipboard. JPG, PNG, WebP up to 8 MB.</span>
+        </div>
+        <input id="file" type="file" accept="image/*" hidden>
+      </div>
+
+      <div class="samples">
+        <span class="muted">Try a sample</span>
+        <div id="samples"></div>
+      </div>
+
+      <div id="viewer" class="viewer hidden">
+        <div class="viewer-bar">
+          <span class="muted" id="viewer-meta"></span>
+          <button id="toggle-boxes" class="btn ghost sm" aria-pressed="true">
+            <svg class="ic"><use href="/static/icons.svg#eye"/></svg><span>Text regions</span>
+          </button>
+        </div>
+        <div class="stage" id="stage"></div>
+      </div>
+    </section>
+
+    <section class="right" aria-label="Results">
+      <div id="empty" class="empty">
+        <svg class="ic ic-xl" aria-hidden="true"><use href="/static/icons.svg#pill"/></svg>
+        <h2>No label yet</h2>
+        <p>Upload a photo or pick a sample. The label is read with OCR, structured by gpt-oss-120b, then each value is checked against the text it came from.</p>
+        <ol class="flow">
+          <li><svg class="ic"><use href="/static/icons.svg#scan-eye"/></svg>OCR finds text and its position</li>
+          <li><svg class="ic"><use href="/static/icons.svg#sparkles"/></svg>The model fills a fixed schema and cites its sources</li>
+          <li><svg class="ic"><use href="/static/icons.svg#shield-check"/></svg>Unsupported values are flagged for review</li>
+        </ol>
+      </div>
+
+      <div id="loading" class="loading hidden" role="status">
+        <svg class="ic ic-lg spin"><use href="/static/icons.svg#loader-circle"/></svg>
+        <span>Reading the label and extracting fields</span>
+      </div>
+
+      <div id="error" class="banner error hidden" role="alert"></div>
+
+      <div id="results" class="hidden">
+        <div id="notice" class="banner info hidden"></div>
+        <div id="stats" class="stats"></div>
+
+        <div class="tabs" role="tablist">
+          <button role="tab" class="tab active" data-tab="fields"><svg class="ic"><use href="/static/icons.svg#list"/></svg>Fields</button>
+          <button role="tab" class="tab" data-tab="text"><svg class="ic"><use href="/static/icons.svg#text"/></svg>OCR text</button>
+          <button role="tab" class="tab" data-tab="json"><svg class="ic"><use href="/static/icons.svg#code-xml"/></svg>JSON</button>
+          <span class="spacer"></span>
+          <button id="copy" class="btn ghost sm"><svg class="ic"><use href="/static/icons.svg#copy"/></svg><span>Copy JSON</span></button>
+          <button id="download" class="btn ghost sm"><svg class="ic"><use href="/static/icons.svg#download"/></svg><span>Download</span></button>
+        </div>
+
+        <div id="panel-fields" class="panel"></div>
+        <div id="panel-text" class="panel hidden"></div>
+        <div id="panel-json" class="panel hidden"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <svg class="ic" aria-hidden="true"><use href="/static/icons.svg#info"/></svg>
+    <span>Portfolio demo. Output can contain errors and is not medical advice. Images are processed in memory and not stored.</span>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
